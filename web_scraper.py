@@ -1,19 +1,20 @@
 import os
 import time
-import logging 
+import logging
 import requests
 import html2text
 from bs4 import BeautifulSoup
 from web_crawler import get_random_proxy, get_urls_from_file
 
-logger =logging.getLogger(__name__)
+# Configure logging
+logger = logging.getLogger(__name__)
 
 def extract_body_content(soup):
     try:
         body = soup.find('body')
         if not body:
             return None
-        tags_to_remove = ['script', 'nav' , 'footer' , 'video' , 'button' , 'svg' , 'img']
+        tags_to_remove = ['script', 'nav', 'footer', 'video', 'button', 'svg', 'img']
         for tag in tags_to_remove:
             for element in body.find_all(tag):
                 element.decompose()
@@ -27,7 +28,7 @@ def extract_body_content(soup):
     except Exception as e:
         logger.error(f"Error extracting body content: {str(e)}")
         return None
-    
+
 def scrape_page(url):
     max_retries = 3
     retries = 0
@@ -40,21 +41,21 @@ def scrape_page(url):
         try:
             proxies = get_random_proxy()
             logger.info(f"Using proxy {proxies['http']} for scraping {url}")
-            response = requests.get(url, headers=headers, proxies=proxies, timeout=10)
+            response = requests.get(url, headers=headers, timeout=10, proxies=proxies)
             response.raise_for_status()
             soup = BeautifulSoup(response.content, 'html.parser')
             body_content = extract_body_content(soup)
             title = soup.title.string if soup.title else 'No Title'
-            return{
-            'url' : url,
-            'title' : title.strip(),
-            'content' : body_content
+            return {
+                'url': url,
+                'title': title.strip(),
+                'content': body_content
             }
         except Exception as e:
             retries += 1
-            logger.error(f"Error scaripng the {url} with proxy {proxies['http']} : {str(e)}. Retry {retries}/{max_retries}")
+            logger.error(f"Error scraping {url} with proxy {proxies['http']}: {str(e)}. Retry {retries}/{max_retries}")
             if retries == max_retries:
-                logger.error(f"Max retries reached for {url}. Skipping...")
+                logger.error(f"Max retries reached for {url}. Skipping.")
                 return None
             time.sleep(2)
 
@@ -70,8 +71,8 @@ def save_content(data, output_dir, index):
 
 def scrape_website(url_file, output_dir):
     urls = get_urls_from_file(url_file)
-    logger.info(f"Found {len(urls)} URLS in file")
-    for i, url in enumerate(urls,1):
+    logger.info(f"Found {len(urls)} URLs in file")
+    for i, url in enumerate(urls, 1):
         logger.info(f"Processing {i}/{len(urls)}: {url}")
         data = scrape_page(url)
         if data and data['content']:
@@ -79,7 +80,7 @@ def scrape_website(url_file, output_dir):
         time.sleep(2)
     logger.info("Scraping completed")
 
-def clean_scraped_data(scraped_dir):
+def clear_scraped_data(scraped_dir):
     try:
         for file in os.listdir(scraped_dir):
             file_path = os.path.join(scraped_dir, file)

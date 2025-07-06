@@ -1,2 +1,5 @@
 venv/
 .env
+data/
+chat_history.db
+rag_system.log

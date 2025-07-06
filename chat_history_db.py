@@ -6,7 +6,7 @@ class ChatHistoryDB:
     def __init__(self, db_path="chat_history.db"):
         self.conn = sqlite3.connect(db_path)
         self.create_tables()
-
+    
     def create_tables(self):
         cursor = self.conn.cursor()
         cursor.execute('''
@@ -14,10 +14,10 @@ class ChatHistoryDB:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             url TEXT UNIQUE,
             collection_name TEXT,
-            timestamp INTEGER          
+            timestamp INTEGER
         )
         ''')
-
+        
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS chat_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,7 +25,7 @@ class ChatHistoryDB:
             question TEXT,
             answer TEXT,
             timestamp INTEGER,
-            FOREIGN KEY (website_id) REFERENCES website (id)
+            FOREIGN KEY (website_id) REFERENCES websites (id)
         )
         ''')
         self.conn.commit()
@@ -34,11 +34,11 @@ class ChatHistoryDB:
         cursor = self.conn.cursor()
         timestamp = int(time.time())
         cursor.execute(
-            "INSERT OR REPLACE INTO websites (url, collection_name, timestamp) VALUES (?,?,?)"
+            "INSERT OR REPLACE INTO websites (url, collection_name, timestamp) VALUES (?, ?, ?)",
             (website_url, collection_name, timestamp)
         )
         self.conn.commit()
-
+    
     def get_qdrant_collection(self, website_url):
         cursor = self.conn.cursor()
         cursor.execute("SELECT collection_name FROM websites WHERE url = ?", (website_url,))
@@ -48,8 +48,8 @@ class ChatHistoryDB:
     def save_chat(self, website_url, question, answer):
         cursor = self.conn.cursor()
         timestamp = int(time.time())
-
-        #Get website_id
+        
+        # Get website_id
         cursor.execute("SELECT id FROM websites WHERE url = ?", (website_url,))
         result = cursor.fetchone()
         if not result:
@@ -57,7 +57,7 @@ class ChatHistoryDB:
         
         website_id = result[0]
         cursor.execute(
-            "INSERT INTO chat_history (website_id, question, answer, timestamp) VALUES (?,?,?,?)",
+            "INSERT INTO chat_history (website_id, question, answer, timestamp) VALUES (?, ?, ?, ?)",
             (website_id, question, answer, timestamp)
         )
         self.conn.commit()
@@ -66,7 +66,7 @@ class ChatHistoryDB:
     def get_chat_history(self, website_url):
         cursor = self.conn.cursor()
         cursor.execute("""
-            SELECT ch.question, ch.answer, ch.timestamp
+            SELECT ch.question, ch.answer, ch.timestamp 
             FROM chat_history ch
             JOIN websites w ON ch.website_id = w.id
             WHERE w.url = ?
