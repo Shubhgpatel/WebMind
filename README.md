@@ -1,6 +1,5 @@
 RAG-Powered Website Chatbot
 A full-stack, real-time chatbot application that leverages Retrieval-Augmented Generation (RAG) with LangChain and LLaMA 3 to provide accurate, source-backed answers from live website content.
-
 🚀 Features
 
 🔍 Web Crawling & Scraping: Fetches and cleans content from entire websites using rotating proxies.
@@ -10,10 +9,8 @@ A full-stack, real-time chatbot application that leverages Retrieval-Augmented G
 🔄 Dynamic Content Reloading: Supports both new and previously cached websites.
 🗃 Chat History Tracking: Logs interactions in a SQLite database for future reference.
 
-
 🛠 Architecture
 User ↔ Streamlit UI ↔ LangChain QA Chain ↔ Qdrant Vector Store ↔ Web Scraping Pipeline
-
 
 Modules
 
